@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frontend Project 3 — Interactive Web Elements</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── DESIGN TOKENS ─── */
+    :root {
+      --bg:         #f5f2ec;
+      --surface:    #ffffff;
+      --surface2:   #eee9df;
+      --border:     #d6cfc3;
+      --text:       #1a1a18;
+      --text-muted: #6b6b5e;
+      --accent:     #3b6e4f;
+      --accent2:    #c0392b;
+      --accent3:    #2c5282;
+      --yellow:     #e6a817;
+      --radius:     14px;
+      --shadow:     0 4px 24px rgba(0,0,0,.08);
+      --transition: .35s cubic-bezier(.4,0,.2,1);
+    }
+    [data-theme="dark"] {
+      --bg:         #111210;
+      --surface:    #1c1e1b;
+      --surface2:   #252722;
+      --border:     #333530;
+      --text:       #e8e4db;
+      --text-muted: #8a8a7a;
+      --accent:     #5aad77;
+      --shadow:     0 4px 24px rgba(0,0,0,.35);
+    }
+
+    /* ─── RESET ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background var(--transition), color var(--transition);
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 99px; }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(1rem, 5vw, 3rem);
+      height: 64px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.1rem;
+      color: var(--accent);
+      letter-spacing: -.02em;
+    }
+    .nav-links {
+      display: flex; gap: 2rem; list-style: none;
+    }
+    .nav-links a {
+      font-size: .875rem; font-weight: 500;
+      color: var(--text-muted); text-decoration: none;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+    /* Dark mode toggle */
+    .theme-toggle {
+      position: relative; width: 50px; height: 26px;
+      cursor: pointer; background: none; border: none; padding: 0;
+    }
+    .theme-track {
+      width: 100%; height: 100%;
+      background: var(--surface2);
+      border-radius: 99px;
+      border: 1.5px solid var(--border);
+      transition: background var(--transition), border-color var(--transition);
+      position: relative;
+    }
+    .theme-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      transition: transform var(--transition), background var(--transition);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
+    }
+    [data-theme="dark"] .theme-thumb { transform: translateX(24px); }
+
+    /* Hamburger */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; background: none; border: none; padding: 4px;
+    }
+    .hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform .3s, opacity .3s;
+    }
+    .hamburger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.is-open span:nth-child(2) { opacity: 0; }
+    .hamburger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile menu */
+    .mobile-menu {
+      display: none;
+      position: fixed; top: 64px; left: 0; right: 0; z-index: 99;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem clamp(1rem,5vw,3rem);
+      flex-direction: column; gap: 1.25rem;
+      transition: background var(--transition);
+    }
+    .mobile-menu.is-open { display: flex; }
+    .mobile-menu a {
+      font-size: 1rem; font-weight: 500;
+      color: var(--text); text-decoration: none;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      padding: 100px clamp(1rem,5vw,3rem) 4rem;
+      display: flex; align-items: center;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-blob {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: .18;
+      pointer-events: none;
+    }
+    .hero-blob-1 { width: 500px; height: 500px; background: var(--accent); top: -100px; right: -100px; }
+    .hero-blob-2 { width: 350px; height: 350px; background: var(--accent3); bottom: 0; left: -80px; }
+    .hero-content {
+      position: relative; max-width: 720px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .75rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: .35rem .85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+    }
+    .hero-badge span { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.5rem, 7vw, 5.5rem);
+      font-weight: 800; line-height: 1.05;
+      letter-spacing: -.04em;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted); line-height: 1.7;
+      max-width: 560px; margin-bottom: 2.5rem;
+    }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary {
+      padding: .85rem 2rem;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem; font-weight: 600;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s, background .2s;
+      box-shadow: 0 4px 16px rgba(59,110,79,.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,110,79,.4); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-outline {
+      padding: .85rem 2rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem; font-weight: 500;
+      color: var(--text); cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .btn-outline:hover { border-color: var(--accent); background: var(--surface); }
+
+    /* ─── SECTIONS ─── */
+    section { padding: 5rem clamp(1rem,5vw,3rem); }
+    .section-label {
+      font-size: .75rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: .75rem;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800; letter-spacing: -.03em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .section-sub {
+      color: var(--text-muted); max-width: 560px;
+      line-height: 1.7; margin-bottom: 3rem;
+    }
+
+    /* ─── IPO SECTION ─── */
+    .ipo-section { background: var(--surface2); }
+    .ipo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .ipo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .ipo-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+    .ipo-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.5rem; font-weight: 800;
+      line-height: 1; margin-bottom: .5rem;
+      opacity: .12;
+      position: absolute; top: 1rem; right: 1.5rem;
+    }
+    .ipo-icon {
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin: 0 auto 1.25rem;
+    }
+    .ipo-card:nth-child(1) .ipo-icon { background: #fbe9e7; }
+    .ipo-card:nth-child(2) .ipo-icon { background: #e3f2fd; }
+    .ipo-card:nth-child(3) .ipo-icon { background: #e8f5e9; }
+    .ipo-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem; font-weight: 700; margin-bottom: .5rem;
+    }
+    .ipo-card p { color: var(--text-muted); font-size: .9rem; line-height: 1.65; }
+
+    /* Arrow between cards */
+    .ipo-wrapper {
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .ipo-arrow {
+      font-size: 1.5rem; color: var(--border);
+      flex-shrink: 0; display: flex; align-items: center;
+    }
+
+    /* ─── DOM CONCEPT ─── */
+    .layers-section { background: var(--bg); }
+    .layers-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+    }
+    .layer-stack { display: flex; flex-direction: column; gap: .75rem; }
+    .layer-item {
+      display: flex; align-items: center; gap: 1.25rem;
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: default;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .layer-item:hover { transform: translateX(8px); box-shadow: var(--shadow); }
+    .layer-dot {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+    }
+    .layer-item:nth-child(1) .layer-dot { background: #e57373; }
+    .layer-item:nth-child(2) .layer-dot { background: #64b5f6; }
+    .layer-item:nth-child(3) .layer-dot { background: #81c784; }
+    .layer-item h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700;
+    }
+    .layer-item p { font-size: .85rem; color: var(--text-muted); margin-top: .2rem; }
+
+    .dom-visual {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem;
+      line-height: 2;
+      color: var(--text-muted);
+    }
+    .dom-visual .tag { color: var(--accent3); }
+    [data-theme="dark"] .dom-visual .tag { color: #7ec8e3; }
+    .dom-visual .indent1 { padding-left: 1.5rem; }
+    .dom-visual .indent2 { padding-left: 3rem; }
+    .dom-visual .indent3 { padding-left: 4.5rem; }
+
+    /* ─── INTERACTIVE DEMOS ─── */
+    .demos-section { background: var(--surface2); }
+    .demos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .demo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      transition: box-shadow .3s;
+    }
+    .demo-card:hover { box-shadow: var(--shadow); }
+    .demo-card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .demo-badge {
+      font-size: .7rem; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; padding: .2rem .6rem;
+      background: var(--surface2); border-radius: 99px;
+      color: var(--text-muted);
+    }
+
+    /* Counter */
+    .counter-display {
+      font-family: 'Syne', sans-serif;
+      font-size: 4rem; font-weight: 800;
+      color: var(--accent); text-align: center;
+      line-height: 1; margin: 1rem 0;
+      transition: transform .15s;
+    }
+    .counter-display.is-bump { transform: scale(1.2); }
+    .counter-btns { display: flex; gap: .75rem; justify-content: center; }
+    .counter-btns button {
+      width: 44px; height: 44px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 1.25rem; font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, transform .15s;
+    }
+    .counter-btns button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .counter-btns button:active { transform: scale(.9); }
+    .counter-reset {
+      display: block; margin: .75rem auto 0;
+      font-size: .8rem; color: var(--text-muted);
+      background: none; border: none; cursor: pointer;
+      text-decoration: underline; text-underline-offset: 3px;
+    }
+
+    /* Accordion */
+    .accordion { display: flex; flex-direction: column; gap: .5rem; }
+    .accordion-item {
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .accordion-header {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: .9rem 1.1rem;
+      background: var(--surface2);
+      border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem; font-weight: 500;
+      color: var(--text);
+      transition: background .2s;
+    }
+    .accordion-header:hover { background: var(--border); }
+    .accordion-icon {
+      font-size: 1.1rem; transition: transform .3s;
+      flex-shrink: 0;
+    }
+    .accordion-item.is-open .accordion-icon { transform: rotate(45deg); }
+    .accordion-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height .4s cubic-bezier(.4,0,.2,1), padding .4s;
+      padding: 0 1.1rem;
+      font-size: .875rem; color: var(--text-muted); line-height: 1.65;
+    }
+    .accordion-body.is-open { max-height: 200px; padding: .9rem 1.1rem; }
+
+    /* Tabs */
+    .tabs-nav {
+      display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem;
+    }
+    .tab-btn {
+      padding: .5rem 1rem;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .82rem; font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .tab-btn.is-active {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.is-active {
+      display: block;
+      animation: fadeIn .3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-panel p { font-size: .875rem; color: var(--text-muted); line-height: 1.65; }
+    .code-snippet {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: var(--text);
+      margin-top: .75rem;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* Color palette */
+    .palette { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .swatch {
+      width: 48px; height: 48px; border-radius: 10px;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+    }
+    .swatch:hover { transform: scale(1.15); box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+    .swatch.is-picked::after {
+      content: '✓';
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: .9rem;
+      text-shadow: 0 1px 3px rgba(0,0,0,.3);
+    }
+    .palette-result {
+      margin-top: 1rem;
+      font-size: .875rem; color: var(--text-muted);
+    }
+    .palette-result strong { color: var(--text); }
+
+    /* Todo */
+    .todo-input-row { display: flex; gap: .5rem; margin-bottom: 1rem; }
+    .todo-input {
+      flex: 1; padding: .65rem .9rem;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .875rem; color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+    }
+    .todo-input:focus { border-color: var(--accent); }
+    .todo-add {
+      padding: .65rem 1rem;
+      background: var(--accent); color: white;
+      border: none; border-radius: 8px;
+      font-size: .875rem; font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .15s;
+    }
+    .todo-add:hover { background: #2e5c40; }
+    .todo-add:active { transform: scale(.94); }
+    .todo-list { list-style: none; display: flex; flex-direction: column; gap: .4rem; }
+    .todo-item {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .6rem .9rem;
+      background: var(--surface2);
+      border-radius: 8px;
+      font-size: .875rem;
+      animation: fadeIn .25s ease;
+    }
+    .todo-check {
+      width: 18px; height: 18px; border-radius: 4px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      cursor: pointer; flex-shrink: 0;
+      transition: background .2s, border-color .2s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem;
+    }
+    .todo-item.is-done .todo-check { background: var(--accent); border-color: var(--accent); color: white; }
+    .todo-item.is-done .todo-text { text-decoration: line-through; color: var(--text-muted); }
+    .todo-text { flex: 1; }
+    .todo-del {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 1rem;
+      transition: color .2s;
+      padding: 0 .2rem;
+    }
+    .todo-del:hover { color: var(--accent2); }
+
+    /* Typing */
+    .typing-display {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem; font-weight: 700;
+      min-height: 2.5rem;
+      color: var(--accent);
+    }
+    .cursor {
+      display: inline-block; width: 2px; height: 1.2em;
+      background: var(--accent); margin-left: 2px;
+      vertical-align: middle;
+      animation: blink .7s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ─── VARIABLE TABLE ─── */
+    .var-section { background: var(--bg); }
+    .var-table-wrapper {
+      overflow-x: auto; border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: .9rem;
+    }
+    thead { background: var(--surface2); }
+    th {
+      padding: .9rem 1.25rem; text-align: left;
+      font-family: 'Syne', sans-serif;
+      font-size: .8rem; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: .9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
+    .badge-yes { color: #3b6e4f; font-weight: 600; }
+    .badge-no  { color: #c0392b; font-weight: 600; }
+    .badge-avoid { background: #fdecea; color: #c0392b; padding: .2rem .6rem; border-radius: 4px; font-size: .8rem; font-weight: 600; }
+    [data-theme="dark"] .badge-avoid { background: rgba(192,57,43,.2); }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82em; background: var(--surface2);
+      padding: .15em .4em; border-radius: 4px;
+    }
+
+    /* ─── PROGRESS TRACKER ─── */
+    .progress-section { background: var(--surface2); }
+    .checklist { display: flex; flex-direction: column; gap: .75rem; max-width: 640px; }
+    .check-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      user-select: none;
+      transition: border-color .2s, background .2s;
+    }
+    .check-item:hover { border-color: var(--accent); }
+    .check-item.is-done {
+      border-color: var(--accent);
+      background: var(--surface2);
+    }
+    .check-box {
+      width: 22px; height: 22px; border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem;
+      transition: background .2s, border-color .2s;
+    }
+    .check-item.is-done .check-box { background: var(--accent); border-color: var(--accent); color: white; }
+    .check-label {
+      font-size: .925rem; font-weight: 500;
+    }
+    .check-item.is-done .check-label { text-decoration: line-through; color: var(--text-muted); }
+    .progress-bar-wrap {
+      height: 8px; background: var(--surface2);
+      border-radius: 99px;
+      margin-top: 1.5rem; overflow: hidden;
+      max-width: 640px;
+    }
+    .progress-bar-fill {
+      height: 100%; background: var(--accent);
+      border-radius: 99px;
+      transition: width .5s cubic-bezier(.4,0,.2,1);
+    }
+    .progress-text { font-size: .875rem; color: var(--text-muted); margin-top: .5rem; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 3rem clamp(1rem,5vw,3rem);
+      display: flex; flex-wrap: wrap;
+      align-items: center; justify-content: space-between;
+      gap: 1rem;
+    }
+    .footer-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.1rem;
+      color: var(--accent);
+    }
+    .footer-sub { font-size: .8rem; color: var(--text-muted); margin-top: .25rem; }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a {
+      font-size: .85rem; color: var(--text-muted); text-decoration: none;
+      transition: color .2s;
+    }
+    .footer-links a:hover { color: var(--accent); }
+
+    /* ─── SCROLL TO TOP ─── */
+    .scroll-top {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 99;
+      width: 44px; height: 44px;
+      background: var(--accent); color: white;
+      border: none; border-radius: 50%;
+      font-size: 1.1rem; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(59,110,79,.4);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: translateY(12px);
+      transition: opacity .3s, transform .3s;
+    }
+    .scroll-top.is-visible { opacity: 1; transform: translateY(0); }
+    .scroll-top:hover { transform: translateY(-3px); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .ipo-wrapper { flex-direction: column; }
+      .ipo-grid { grid-template-columns: 1fr; }
+      .ipo-arrow { transform: rotate(90deg); }
+      .layers-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">DecodeLabs</div>
+  <ul class="nav-links">
+    <li><a href="#ipo">IPO Loop</a></li>
+    <li><a href="#dom">DOM</a></li>
+    <li><a href="#demos">Demos</a></li>
+    <li><a href="#variables">Variables</a></li>
+    <li><a href="#progress">Progress</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-toggle js-theme-toggle" aria-label="Toggle dark mode">
+      <div class="theme-track">
+        <div class="theme-thumb" id="themeThumb">☀️</div>
+      </div>
+    </button>
+    <button class="hamburger js-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu js-mobile-menu">
+  <a href="#ipo">IPO Loop</a>
+  <a href="#dom">DOM</a>
+  <a href="#demos">Demos</a>
+  <a href="#variables">Variables</a>
+  <a href="#progress">Progress</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-blob hero-blob-1"></div>
+  <div class="hero-blob hero-blob-2"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span></span> Project 3 · Batch 2026</div>
+    <h1>Interactive <em>Web</em><br>Elements ⚡</h1>
+    <p>Master the art of JavaScript DOM manipulation — build pages that respond to users in real-time. Buttons, toggles, state management — all from scratch.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('demos').scrollIntoView({behavior:'smooth'})">Explore Demos</button>
+      <button class="btn-outline" onclick="document.getElementById('ipo').scrollIntoView({behavior:'smooth'})">Learn the IPO Loop</button>
+    </div>
+  </div>
+</section>
+
+<!-- IPO LOOP -->
+<section class="ipo-section" id="ipo">
+  <div class="section-label">The Universal Law</div>
+  <h2 class="section-title">Input → Process → Output</h2>
+  <p class="section-sub">Every interactive element on the web follows the IPO loop. Understand this, and you understand all of frontend engineering.</p>
+
+  <div class="ipo-wrapper">
+    <div class="ipo-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;flex:1">
+      <div class="ipo-card">
+        <div class="ipo-num">01</div>
+        <div class="ipo-icon">🖱️</div>
+        <h3>Input</h3>
+        <p>A requirement from the environment — a user click, keypress, or page load event.</p>
+      </div>
+      <div class="ipo-card">
+        <div class="ipo-num">02</div>
+        <div class="ipo-icon">⚙️</div>
+        <h3>Process</h3>
+        <p>The system detects the signal and applies business logic — your JavaScript function runs.</p>
+      </div>
+      <div class="ipo-card">
+        <div class="ipo-num">03</div>
+        <div class="ipo-icon">✨</div>
+        <h3>Output</h3>
+        <p>A visible change — the DOM is mutated and the environment dynamically updates.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOM SECTION -->
+<section class="layers-section" id="dom">
+  <div class="section-label">Architecture</div>
+  <h2 class="section-title">The Web Stack</h2>
+  <p class="section-sub">HTML is the bones, CSS is the skin, JavaScript is the nervous system. Together they make a living, breathing interface.</p>
+
+  <div class="layers-grid">
+    <div class="layer-stack">
+      <div class="layer-item">
+        <div class="layer-dot"></div>
+        <div>
+          <h4>HTML — The Bones</h4>
+          <p>The structural scaffolding. Semantic markup that defines meaning.</p>
+        </div>
+      </div>
+      <div class="layer-item">
+        <div class="layer-dot"></div>
+        <div>
+          <h4>CSS — The Skin</h4>
+          <p>The visual identity and presentation. Controls appearance and transitions.</p>
+        </div>
+      </div>
+      <div class="layer-item">
+        <div class="layer-dot"></div>
+        <div>
+          <h4>JavaScript — The Nervous System</h4>
+          <p>Transmits signals, processes intent, and actuates movement via DOM manipulation.</p>
+        </div>
+      </div>
+    </div>
+    <div class="dom-visual">
+<span class="tag">&lt;html&gt;</span>
+<div class="indent1"><span class="tag">&lt;head&gt;</span>…<span class="tag">&lt;/head&gt;</span></div>
+<div class="indent1"><span class="tag">&lt;body&gt;</span></div>
+<div class="indent2"><span class="tag">&lt;nav&gt;</span>…<span class="tag">&lt;/nav&gt;</span></div>
+<div class="indent2"><span class="tag">&lt;main&gt;</span></div>
+<div class="indent3"><span class="tag">&lt;button</span> class=<span style="color:var(--accent)">"js-toggle"</span><span class="tag">&gt;</span></div>
+<div class="indent3">Click Me</div>
+<div class="indent3"><span class="tag">&lt;/button&gt;</span></div>
+<div class="indent2"><span class="tag">&lt;/main&gt;</span></div>
+<div class="indent1"><span class="tag">&lt;/body&gt;</span></div>
+<span class="tag">&lt;/html&gt;</span>
+    </div>
+  </div>
+</section>
+
+<!-- DEMOS -->
+<section class="demos-section" id="demos">
+  <div class="section-label">Live Interaction</div>
+  <h2 class="section-title">Interactive Demos</h2>
+  <p class="section-sub">All demos built with pure Vanilla JS — DOM manipulation, state management, and event listeners in action.</p>
+
+  <div class="demos-grid">
+
+    <!-- Counter -->
+    <div class="demo-card">
+      <div class="demo-card-title">Counter <span class="demo-badge">State</span></div>
+      <div class="counter-display js-counter-display" id="counterDisplay">0</div>
+      <div class="counter-btns">
+        <button class="js-counter-dec" title="Decrease">−</button>
+        <button class="js-counter-inc" title="Increase">+</button>
+      </div>
+      <button class="counter-reset js-counter-reset">Reset</button>
+    </div>
+
+    <!-- Accordion FAQ -->
+    <div class="demo-card">
+      <div class="demo-card-title">Accordion <span class="demo-badge">Toggle</span></div>
+      <div class="accordion js-accordion">
+        <div class="accordion-item">
+          <button class="accordion-header">What is the DOM?<span class="accordion-icon">+</span></button>
+          <div class="accordion-body">The Document Object Model is the browser's living map of your HTML — a tree of nodes that JavaScript can read and mutate.</div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-header">What is an event listener?<span class="accordion-icon">+</span></button>
+          <div class="accordion-body">A function attached to a DOM node that waits for a specific action — a click, keypress, or scroll — then executes your logic.</div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-header">What is state?<span class="accordion-icon">+</span></button>
+          <div class="accordion-body">The collection of JavaScript variables that determines what the user sees. When state changes, the UI must update to reflect it.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="demo-card">
+      <div class="demo-card-title">Tabs <span class="demo-badge">Dynamic Content</span></div>
+      <div class="tabs-nav">
+        <button class="tab-btn is-active js-tab-btn" data-tab="tab1">HTML</button>
+        <button class="tab-btn js-tab-btn" data-tab="tab2">CSS</button>
+        <button class="tab-btn js-tab-btn" data-tab="tab3">JS</button>
+      </div>
+      <div class="tab-panel is-active" id="tab1">
+        <p>HTML provides the structural skeleton. Use semantic elements like <code>&lt;button&gt;</code>, <code>&lt;nav&gt;</code>, and <code>&lt;main&gt;</code>.</p>
+        <div class="code-snippet">&lt;button class="js-toggle"&gt;Click&lt;/button&gt;</div>
+      </div>
+      <div class="tab-panel" id="tab2">
+        <p>CSS defines visual state via class-based styling. JavaScript toggles classes — CSS handles the animation.</p>
+        <div class="code-snippet">.is-active { background: var(--accent); }</div>
+      </div>
+      <div class="tab-panel" id="tab3">
+        <p>JavaScript wires the behaviour. Keep it decoupled with <code>js-</code> prefixed hooks and <code>is-</code> state classes.</p>
+        <div class="code-snippet">btn.addEventListener('click', handleClick);</div>
+      </div>
+    </div>
+
+    <!-- Colour Picker -->
+    <div class="demo-card">
+      <div class="demo-card-title">Colour Picker <span class="demo-badge">DOM Mutation</span></div>
+      <div class="palette js-palette">
+        <div class="swatch js-swatch" style="background:#3b6e4f" data-name="Forest Green"></div>
+        <div class="swatch js-swatch" style="background:#2c5282" data-name="Ocean Blue"></div>
+        <div class="swatch js-swatch" style="background:#c0392b" data-name="Crimson"></div>
+        <div class="swatch js-swatch" style="background:#e6a817" data-name="Amber"></div>
+        <div class="swatch js-swatch" style="background:#6b3fa0" data-name="Royal Purple"></div>
+        <div class="swatch js-swatch" style="background:#1a1a18" data-name="Carbon Black"></div>
+      </div>
+      <div class="palette-result js-palette-result">Click a colour to pick it.</div>
+    </div>
+
+    <!-- Todo List -->
+    <div class="demo-card">
+      <div class="demo-card-title">Todo List <span class="demo-badge">createElement</span></div>
+      <div class="todo-input-row">
+        <input class="todo-input js-todo-input" type="text" placeholder="Add a task…" maxlength="60" />
+        <button class="todo-add js-todo-add">Add</button>
+      </div>
+      <ul class="todo-list js-todo-list">
+        <li class="todo-item" data-id="1">
+          <button class="todo-check js-todo-check">✓</button>
+          <span class="todo-text">Read the IPO loop slides</span>
+          <button class="todo-del js-todo-del">✕</button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Typing Effect -->
+    <div class="demo-card">
+      <div class="demo-card-title">Typing Effect <span class="demo-badge">setInterval</span></div>
+      <div class="typing-display">
+        <span class="js-typing-text"></span><span class="cursor"></span>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn-primary" style="font-size:.8rem;padding:.5rem 1rem" id="typingPlayBtn">▶ Play</button>
+        <button class="btn-outline" style="font-size:.8rem;padding:.5rem 1rem" id="typingPauseBtn">⏸ Pause</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- VARIABLE TABLE -->
+<section class="var-section" id="variables">
+  <div class="section-label">Variable Integrity</div>
+  <h2 class="section-title">Signaling Intent</h2>
+  <p class="section-sub">Choosing the right variable declaration signals your intent to the team and prevents bugs before they happen.</p>
+
+  <div class="var-table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Declaration</th>
+          <th>Reassignment</th>
+          <th>Scope</th>
+          <th>Modern Usage</th>
+          <th>When to Use</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>const</code></td>
+          <td class="badge-no">No</td>
+          <td>Block</td>
+          <td class="badge-yes">✓ Preferred</td>
+          <td>DOM references, fixed values — default choice</td>
+        </tr>
+        <tr>
+          <td><code>let</code></td>
+          <td class="badge-yes">Yes</td>
+          <td>Block</td>
+          <td class="badge-yes">✓ When needed</td>
+          <td>Counters, flags, any value that must mutate</td>
+        </tr>
+        <tr>
+          <td><code>var</code></td>
+          <td class="badge-yes">Yes</td>
+          <td>Function</td>
+          <td><span class="badge-avoid">✕ Avoid</span></td>
+          <td>Legacy code only — prone to hoisting bugs</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PROGRESS TRACKER -->
+<section class="progress-section" id="progress">
+  <div class="section-label">Qualification Criteria</div>
+  <h2 class="section-title">Earn Your Badge 🛡️</h2>
+  <p class="section-sub">Track your Project 3 completion. Click each requirement to mark it done.</p>
+
+  <div class="checklist js-checklist">
+    <div class="check-item js-check-item">
+      <div class="check-box js-check-box"></div>
+      <span class="check-label">Implement at least one button or toggle with JavaScript</span>
+    </div>
+    <div class="check-item js-check-item">
+      <div class="check-box js-check-box"></div>
+      <span class="check-label">Add basic user interaction with event listeners</span>
+    </div>
+    <div class="check-item js-check-item">
+      <div class="check-box js-check-box"></div>
+      <span class="check-label">Demonstrate dynamic content update (DOM mutation)</span>
+    </div>
+    <div class="check-item js-check-item">
+      <div class="check-box js-check-box"></div>
+      <span class="check-label">Use <code>const</code> and <code>let</code> correctly (avoid <code>var</code>)</span>
+    </div>
+    <div class="check-item js-check-item">
+      <div class="check-box js-check-box"></div>
+      <span class="check-label">Decouple logic with <code>js-</code> hooks and <code>is-</code> state classes</span>
+    </div>
+    <div class="check-item js-check-item">
+      <div class="check-box js-check-box"></div>
+      <span class="check-label">Project verified and submitted for quality review</span>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill js-progress-fill" style="width:0%"></div>
+  </div>
+  <div class="progress-text js-progress-text">0 / 6 requirements completed</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-brand">DecodeLabs</div>
+    <div class="footer-sub">Frontend Development · Project 3 · Batch 2026</div>
+  </div>
+  <div class="footer-links">
+    <a href="mailto:decodelabs.tech@gmail.com">decodelabs.tech@gmail.com</a>
+    <a href="https://www.decodelabs.tech" target="_blank">www.decodelabs.tech</a>
+  </div>
+</footer>
+
+<!-- Scroll to top -->
+<button class="scroll-top js-scroll-top" aria-label="Scroll to top">↑</button>
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+  'use strict';
+
+  /* ── THEME TOGGLE ── */
+  const html = document.documentElement;
+  const themeToggle = document.querySelector('.js-theme-toggle');
+  const themeThumb  = document.getElementById('themeThumb');
+
+  const applyTheme = (theme) => {
+    html.setAttribute('data-theme', theme);
+    themeThumb.textContent = theme === 'dark' ? '🌙' : '☀️';
+  };
+
+  // Load saved preference
+  applyTheme(localStorage.getItem('theme') || 'light');
+
+  themeToggle.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem('theme', next);
+  });
+
+  /* ── HAMBURGER MENU ── */
+  const hamburger   = document.querySelector('.js-hamburger');
+  const mobileMenu  = document.querySelector('.js-mobile-menu');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('is-open');
+    mobileMenu.classList.toggle('is-open');
+  });
+
+  // Close on link click
+  mobileMenu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      hamburger.classList.remove('is-open');
+      mobileMenu.classList.remove('is-open');
+    });
+  });
+
+  /* ── COUNTER ── */
+  let count = 0;
+  const counterDisplay = document.querySelector('.js-counter-display');
+
+  const updateCounter = (val) => {
+    count = val;
+    counterDisplay.textContent = count;
+    counterDisplay.classList.add('is-bump');
+    setTimeout(() => counterDisplay.classList.remove('is-bump'), 150);
+  };
+
+  document.querySelector('.js-counter-inc').addEventListener('click', () => updateCounter(count + 1));
+  document.querySelector('.js-counter-dec').addEventListener('click', () => updateCounter(count - 1));
+  document.querySelector('.js-counter-reset').addEventListener('click', () => updateCounter(0));
+
+  /* ── ACCORDION ── */
+  document.querySelectorAll('.accordion-header').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.accordion-item');
+      const body = item.querySelector('.accordion-body');
+      const isOpen = item.classList.contains('is-open');
+
+      // Close all
+      document.querySelectorAll('.accordion-item').forEach(i => {
+        i.classList.remove('is-open');
+        i.querySelector('.accordion-body').classList.remove('is-open');
+      });
+
+      if (!isOpen) {
+        item.classList.add('is-open');
+        body.classList.add('is-open');
+      }
+    });
+  });
+
+  /* ── TABS ── */
+  document.querySelectorAll('.js-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.js-tab-btn').forEach(b => b.classList.remove('is-active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      document.getElementById(btn.dataset.tab).classList.add('is-active');
+    });
+  });
+
+  /* ── COLOUR PICKER ── */
+  const paletteResult = document.querySelector('.js-palette-result');
+
+  document.querySelectorAll('.js-swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      document.querySelectorAll('.js-swatch').forEach(s => s.classList.remove('is-picked'));
+      swatch.classList.add('is-picked');
+      paletteResult.innerHTML = `Selected: <strong>${swatch.dataset.name}</strong>`;
+    });
+  });
+
+  /* ── TODO LIST ── */
+  let todoId = 2;
+  const todoInput = document.querySelector('.js-todo-input');
+  const todoList  = document.querySelector('.js-todo-list');
+
+  const addTodo = () => {
+    const text = todoInput.value.trim();
+    if (!text) return;
+
+    const li = document.createElement('li');
+    li.className = 'todo-item';
+    li.dataset.id = todoId++;
+    li.innerHTML = `
+      <button class="todo-check js-todo-check"></button>
+      <span class="todo-text">${text}</span>
+      <button class="todo-del js-todo-del">✕</button>
+    `;
+
+    li.querySelector('.js-todo-check').addEventListener('click', () => toggleTodo(li));
+    li.querySelector('.js-todo-del').addEventListener('click', () => li.remove());
+
+    todoList.appendChild(li);
+    todoInput.value = '';
+    todoInput.focus();
+  };
+
+  const toggleTodo = (li) => {
+    const isDone = li.classList.toggle('is-done');
+    li.querySelector('.js-todo-check').textContent = isDone ? '✓' : '';
+  };
+
+  document.querySelector('.js-todo-add').addEventListener('click', addTodo);
+  todoInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTodo(); });
+
+  // Wire existing item
+  todoList.querySelectorAll('.todo-item').forEach(li => {
+    li.querySelector('.js-todo-check').addEventListener('click', () => toggleTodo(li));
+    li.querySelector('.js-todo-del').addEventListener('click', () => li.remove());
+  });
+
+  /* ── TYPING EFFECT ── */
+  const phrases = [
+    'Engineering living systems.',
+    'Master DOM manipulation.',
+    'Implement the IPO loop.',
+    'Protect your state.',
+    'Decouple your logic.',
+    'Start building. 🚀',
+  ];
+  const typingEl = document.querySelector('.js-typing-text');
+  let pIdx = 0, cIdx = 0, isDeleting = false, typingTimer = null, isPaused = false;
+
+  const type = () => {
+    if (isPaused) return;
+    const phrase = phrases[pIdx];
+
+    if (!isDeleting) {
+      typingEl.textContent = phrase.slice(0, ++cIdx);
+      if (cIdx === phrase.length) { isDeleting = true; typingTimer = setTimeout(type, 1800); return; }
+    } else {
+      typingEl.textContent = phrase.slice(0, --cIdx);
+      if (cIdx === 0) { isDeleting = false; pIdx = (pIdx + 1) % phrases.length; typingTimer = setTimeout(type, 400); return; }
+    }
+    typingTimer = setTimeout(type, isDeleting ? 45 : 75);
+  };
+
+  document.getElementById('typingPlayBtn').addEventListener('click', () => {
+    isPaused = false; clearTimeout(typingTimer); type();
+  });
+  document.getElementById('typingPauseBtn').addEventListener('click', () => {
+    isPaused = true; clearTimeout(typingTimer);
+  });
+  type();
+
+  /* ── PROGRESS CHECKLIST ── */
+  const checkItems = document.querySelectorAll('.js-check-item');
+  const progressFill = document.querySelector('.js-progress-fill');
+  const progressText = document.querySelector('.js-progress-text');
+
+  const updateProgress = () => {
+    const done = document.querySelectorAll('.js-check-item.is-done').length;
+    const pct = Math.round((done / checkItems.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressText.textContent = `${done} / ${checkItems.length} requirements completed`;
+  };
+
+  checkItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const isDone = item.classList.toggle('is-done');
+      const box = item.querySelector('.js-check-box');
+      box.textContent = isDone ? '✓' : '';
+      updateProgress();
+    });
+  });
+
+  /* ── SCROLL TO TOP ── */
+  const scrollTopBtn = document.querySelector('.js-scroll-top');
+
+  window.addEventListener('scroll', () => {
+    scrollTopBtn.classList.toggle('is-visible', window.scrollY > 400);
+  });
+
+  scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+</body>
+</html>

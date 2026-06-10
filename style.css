@@ -1,0 +1,295 @@
+
+/* ==========================================================================
+   PREMIUM 60-30-10 COLOR RULE ARCHITECTURE & DESIGN SYSTEM
+   ========================================================================== */
+:root {
+    /* 60% Dominant Background Tone (Deep Luxury Charcoal Slate) */
+    --bg-main: #0b0f19;
+    --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
+    
+    /* 30% Structural Components & Layout Cards */
+    --card-surface: #1f2937;
+    --card-border: rgba(255, 255, 255, 0.06);
+    --text-primary: #f3f4f6;
+    --text-muted: #9ca3af;
+    
+    /* 10% Energetic High-Contrast Accent Glow (Cinematic Emerald/Teal) */
+    --accent-glow: #10b981;
+    --accent-hover: #059669;
+    --accent-subtle: rgba(16, 185, 129, 0.1);
+    
+    --shadow-premium: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    --radius-main: 12px;
+}
+
+/* Light/Alternative Matrix Theme Configuration Override */
+[data-theme="matrix-light"] {
+    --bg-main: #f3f4f6;
+    --bg-gradient: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    --card-surface: #ffffff;
+    --card-border: rgba(0, 0, 0, 0.08);
+    --text-primary: #111827;
+    --text-muted: #4b5563;
+    --accent-glow: #3b82f6; /* Modern electric blue accent for light grid change */
+    --accent-hover: #2563eb;
+    --accent-subtle: rgba(59, 130, 246, 0.1);
+    --shadow-premium: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+}
+
+/* Base Clean Reset Rules */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    gap: 24px;
+    transition: background 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), color 0.4s ease;
+}
+
+/* ==========================================================================
+   LAYOUT STRUCTURE (RESPONSIVE VIEWPORTS)
+   ========================================================================== */
+.premium-header {
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--card-surface);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-main);
+    box-shadow: var(--shadow-premium);
+}
+
+.brand-badge {
+    display: inline-block;
+    background: var(--accent-subtle);
+    color: var(--accent-glow);
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border-radius: 50px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+/* Master Grid Area Configuration */
+.workspace-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Mobile View Base Structure (Stacked Layout) */
+    gap: 24px;
+    flex: 1;
+}
+
+.interactive-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Glass-morphism Component Cards UI */
+.glass-card, .aesthetic-sidebar {
+    background: var(--card-surface);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-main);
+    padding: 32px;
+    box-shadow: var(--shadow-premium);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-tag {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+h2, h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.status-description, .sidebar-text {
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-size: 0.98rem;
+}
+
+/* ==========================================================================
+   INTERACTIVE BUTTONS & UI CONTROLS
+   ========================================================================== */
+.action-dock {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap; /* Auto-wraps on extremely narrow compact screens */
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary {
+    background: var(--accent-glow);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-accent {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border: 1px solid var(--card-border);
+}
+
+.btn-accent:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Premium Digital Counter Area Styles */
+.counter-display-unit {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-top: 16px;
+}
+
+.counter-number {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--accent-glow);
+    line-height: 1;
+}
+
+.counter-control-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-control {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-control:hover {
+    background: var(--accent-glow);
+    color: white;
+    border-color: var(--accent-glow);
+}
+
+/* System HUD Logger Graphic */
+.hud-monitor {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 0.85rem;
+}
+
+.hud-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.badge-active {
+    background: var(--accent-subtle);
+    color: var(--accent-glow);
+}
+
+.log-text {
+    font-family: monospace;
+    color: var(--accent-glow);
+}
+
+.aesthetic-footer {
+    text-align: center;
+    padding: 24px 10px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--card-border);
+}
+
+/* ==========================================================================
+   MEDIA QUERIES (BREAKPOINTS FOR TABLETS & DESKTOPS DISPLAY MONITOR)
+   ========================================================================== */
+
+/* Tablet Optimization Blueprint (768px and up) */
+@media (min-width: 768px) {
+    body {
+        padding: 40px;
+        gap: 32px;
+    }
+    h1 {
+        font-size: 2.75rem;
+    }
+}
+
+/* Desktop Ultimate Optimization Dashboard Frame (1024px and up) */
+@media (min-width: 1024px) {
+    .workspace-grid {
+        grid-template-columns: 2.2fr 1fr; /* Splitting Workspace into clean asymmetric columns */
+    }
+    .sidebar-sticky-content {
+        position: sticky;
+        top: 40px;
+    }
+}
